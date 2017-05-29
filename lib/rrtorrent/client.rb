@@ -1,13 +1,9 @@
 module RRTorrent
   class Client < XMLRPC::Client
-    def list_methods
-      system.listMethods
-    end
-
     def list_torrents
       rpcs = Torrent.property_rpc_names.map { |rpc| "#{rpc}=" }
 
-      torrents.multicall('main', *rpcs).map do |torrent|
+      call('d.multicall', 'main', *rpcs).map do |torrent|
         Torrent.from_array(torrent)
       end
     end
@@ -17,14 +13,6 @@ module RRTorrent
     end
 
     private
-
-    def system
-      @system ||= proxy('system')
-    end
-
-    def torrents
-      @torrents ||= proxy('d')
-    end
 
     def do_rpc(xml, _async = false)
       headers = {
