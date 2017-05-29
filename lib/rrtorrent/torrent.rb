@@ -64,7 +64,7 @@ module RRTorrent
       Torrent.new(Torrent.properties.zip(arr).to_h)
     end
 
-    def refresh(client)
+    def refresh!(client)
       Torrent.values_for(client, id).each do |k, v|
         send("#{k}=", v)
       end
