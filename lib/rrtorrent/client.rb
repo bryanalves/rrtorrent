@@ -1,9 +1,17 @@
 module RRTorrent
   class Client < XMLRPC::Client
-    def list_torrents
+    TORRENT_VIEW = {
+      main:    'main',
+      started: 'started',
+      stopped: 'stopped',
+      hashing: 'hashing',
+      seeding: 'seeding'
+    }.freeze
+
+    def list_torrents(view = :main)
       rpcs = Torrent.property_rpc_names.map { |rpc| "#{rpc}=" }
 
-      call('d.multicall', 'main', *rpcs).map do |torrent|
+      call('d.multicall', TORRENT_VIEW[view], *rpcs).map do |torrent|
         Torrent.from_array(torrent)
       end
     end
