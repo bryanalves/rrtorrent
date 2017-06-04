@@ -54,9 +54,5 @@ module RRTorrent
     def self.property_rpc_names
       PropertyMap.values
     end
-
-    def self.from_array(arr)
-      Torrent.new(Torrent.properties.zip(arr).to_h)
-    end
   end
 end

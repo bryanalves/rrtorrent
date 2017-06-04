@@ -1,23 +1,23 @@
 module RRTorrent
   class Client < XMLRPC::Client
-    TORRENT_VIEW = {
-      main:    'main',
-      started: 'started',
-      stopped: 'stopped',
-      hashing: 'hashing',
-      seeding: 'seeding'
-    }.freeze
+    TORRENT_VIEW = Set.new %i[main started stopped hashing seeding]
 
     def list_torrents(view = :main)
+      raise "Invalid view" unless TORRENT_VIEW.include?(view)
       rpcs = Torrent.property_rpc_names.map { |rpc| "#{rpc}=" }
-
-      call('d.multicall', TORRENT_VIEW[view], *rpcs).map do |torrent|
-        Torrent.from_array(torrent)
+      call('d.multicall', view, *rpcs).map do |torrent|
+        Torrent.new(Torrent.properties.zip(torrent).to_h)
       end
-    end
+     end
 
     def get_torrent(id)
       Torrent.new(values_for_torrent(id))
+    end
+
+    def get_torrents(ids)
+      ids.map do |id|
+        get_torrent(id)
+      end
     end
 
     def update_torrent(torrent)
@@ -28,9 +28,19 @@ module RRTorrent
 
     private
 
+    def values_for_torrents(ids)
+      rpcs = ids.flat_map do |id|
+        Torrent.property_rpc_names.zip([id].cycle)
+      end
+
+      vals = multicall(*rpcs)
+      vals.each_slice(Torrent.properties.count).map do |torrent|
+        Torrent.properties.zip(torrent).to_h
+      end
+    end
+
     def values_for_torrent(id)
-      vals = multicall(*Torrent.property_rpc_names.zip([id].cycle))
-      Torrent.properties.zip(vals).to_h
+      values_for_torrents(Array(id)).first
     end
 
     def do_rpc(xml, _async = false)
