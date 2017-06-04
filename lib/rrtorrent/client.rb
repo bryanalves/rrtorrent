@@ -9,10 +9,21 @@ module RRTorrent
     end
 
     def get_torrent(id)
-      Torrent.new(Torrent.values_for(self, id))
+      Torrent.new(values_for_torrent(id))
+    end
+
+    def update_torrent(torrent)
+      values_for_torrent(torrent.id).each do |k, v|
+        torrent.public_send("#{k}=", v)
+      end
     end
 
     private
+
+    def values_for_torrent(id)
+      vals = multicall(*Torrent.property_rpc_names.zip([id].cycle))
+      Torrent.properties.zip(vals).to_h
+    end
 
     def do_rpc(xml, _async = false)
       headers = {

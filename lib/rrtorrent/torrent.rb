@@ -55,19 +55,8 @@ module RRTorrent
       PropertyMap.values
     end
 
-    def self.values_for(client, id)
-      vals = client.multicall(*Torrent.property_rpc_names.zip([id].cycle))
-      properties.zip(vals).to_h
-    end
-
     def self.from_array(arr)
       Torrent.new(Torrent.properties.zip(arr).to_h)
-    end
-
-    def refresh!(client)
-      Torrent.values_for(client, id).each do |k, v|
-        send("#{k}=", v)
-      end
     end
   end
 end

@@ -12,7 +12,7 @@ client = RRTorrent::Client.new_from_hash({host: '192.168.1.101', port: 5000})
 
 torrents = client.list_torrents
 
-torrents.first.refresh!(client)
+client.update_torrent(torrents.first)
 
 torrent = client.get_torrent('0A12345...')
 ```
