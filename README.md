@@ -8,7 +8,7 @@ Sample usage:
 ```
 require 'rrtorrent'
 
-client = RRTorrent::Client.new_from_hash({host: '192.168.1.101', port: 5000})
+client = RRTorrent::Client.new('192.168.1.101', 5000)
 
 torrents = client.list_torrents
 
