@@ -3,12 +3,10 @@ module RRTorrent
     TORRENT_VIEW = Set.new %i[main started stopped hashing seeding]
 
     def list_torrents(view = :main)
-      raise "Invalid view" unless TORRENT_VIEW.include?(view)
-      rpcs = Torrent.property_rpc_names.map { |rpc| "#{rpc}=" }
-      call('d.multicall', view, *rpcs).map do |torrent|
-        Torrent.new(Torrent.properties.zip(torrent).to_h)
+      values_for_torrent_view(view).map do |torrent|
+        Torrent.new(torrent)
       end
-     end
+    end
 
     def get_torrent(id)
       Torrent.new(values_for_torrent(id))
@@ -27,6 +25,14 @@ module RRTorrent
     end
 
     private
+
+    def values_for_torrent_view(view)
+      raise 'Invalid view' unless TORRENT_VIEW.include?(view)
+      rpcs = Torrent.property_rpc_names.map { |rpc| "#{rpc}=" }
+      call('d.multicall', view, *rpcs).map do |torrent|
+        Torrent.properties.zip(torrent).to_h
+      end
+    end
 
     def values_for_torrents(ids)
       rpcs = ids.flat_map do |id|
